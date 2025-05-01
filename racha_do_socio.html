@@ -1,0 +1,197 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Racha do Sócio</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #fff;
+      color: #333;
+    }
+    header {
+      background-color: #b00000;
+      color: #fff;
+      padding: 1rem;
+      text-align: center;
+    }
+    .container {
+      padding: 2rem;
+    }
+    .section {
+      margin-bottom: 2rem;
+    }
+    h2 {
+      color: #b00000;
+    }
+    button, input, select {
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    .check-in-btn {
+      background-color: #b00000;
+      color: white;
+      border: none;
+    }
+    .multas-list li {
+      margin-bottom: 0.5rem;
+    }
+    .login-buttons button {
+      margin: 0.5rem;
+      padding: 0.7rem;
+      background-color: #f5f5f5;
+      border: 1px solid #ccc;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Racha do Sócio</h1>
+  </header>
+  <div class="container">
+    <div class="section">
+      <button class="check-in-btn" onclick="fazerCheckin()">Fazer Check-in</button>
+      <p id="checkin-status"></p>
+    </div>
+
+    <div class="section">
+      <h2>Multas e Cartões</h2>
+      <ul class="multas-list">
+        <li>Atraso: R$2,00</li>
+        <li>Cartão Amarelo: R$2,00</li>
+        <li>Cartão Azul: R$3,00</li>
+        <li>Cartão Vermelho: R$10,00</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>Criação de Partida</h2>
+      <form onsubmit="criarPartida(event)">
+        <input type="text" id="nomePartida" placeholder="Nome da partida" required><br>
+        <input type="number" id="vagas" placeholder="Número de vagas" required><br>
+        <input type="number" id="valor" placeholder="Valor a pagar por jogador (R$)" required><br>
+        <button type="submit">Criar Partida</button>
+      </form>
+      <ul id="lista-partidas"></ul>
+    </div>
+
+    <div class="section">
+      <h2>Perfil do Jogador</h2>
+      <form onsubmit="salvarPerfil(event)">
+        <input type="text" id="nome" placeholder="Nome" required><br>
+        <input type="text" id="posicao" placeholder="Posição (ex: Atacante)" required><br>
+        <input type="text" id="perna" placeholder="Perna boa (esquerda/direita)" required><br>
+        <input type="file" accept="image/*" id="foto"><br>
+        <button type="submit">Salvar Perfil</button>
+      </form>
+      <div id="perfil-exibido"></div>
+    </div>
+
+    <div class="section">
+      <h2>Histórico de Peladas</h2>
+      <ul id="historico-peladas"></ul>
+    </div>
+
+    <div class="section">
+      <h2>Login</h2>
+      <div class="login-buttons">
+        <button onclick="simularLogin('google')">Entrar com Google</button>
+        <button onclick="simularLogin('facebook')">Entrar com Facebook</button>
+        <button onclick="simularLogin('telefone')">Entrar com telefone</button>
+      </div>
+      <p id="login-status"></p>
+    </div>
+  </div>
+
+  <script>
+    function fazerCheckin() {
+      localStorage.setItem('checkin', 'feito');
+      document.getElementById('checkin-status').innerText = 'Check-in realizado com sucesso!';
+    }
+
+    function criarPartida(event) {
+      event.preventDefault();
+      const nome = document.getElementById('nomePartida').value;
+      const vagas = document.getElementById('vagas').value;
+      const valor = document.getElementById('valor').value;
+      const partida = `${nome} - ${vagas} vagas - R$${valor}/jogador`;
+      let partidas = JSON.parse(localStorage.getItem('partidas')) || [];
+      partidas.push(partida);
+      localStorage.setItem('partidas', JSON.stringify(partidas));
+      atualizarPartidas();
+      event.target.reset();
+    }
+
+    function salvarPerfil(event) {
+      event.preventDefault();
+      const nome = document.getElementById('nome').value;
+      const posicao = document.getElementById('posicao').value;
+      const perna = document.getElementById('perna').value;
+      const perfil = { nome, posicao, perna };
+      localStorage.setItem('perfil', JSON.stringify(perfil));
+      exibirPerfil();
+    }
+
+    function exibirPerfil() {
+      const perfil = JSON.parse(localStorage.getItem('perfil'));
+      if (perfil) {
+        const perfilDiv = document.getElementById('perfil-exibido');
+        perfilDiv.innerHTML = `<p><strong>${perfil.nome}</strong> - ${perfil.posicao} - ${perfil.perna}</p>`;
+      }
+    }
+
+    function atualizarPartidas() {
+      const lista = document.getElementById('lista-partidas');
+      lista.innerHTML = '';
+      const partidas = JSON.parse(localStorage.getItem('partidas')) || [];
+      partidas.forEach(partida => {
+        const item = document.createElement('li');
+        item.textContent = partida;
+        lista.appendChild(item);
+      });
+    }
+
+    function simularLogin(tipo) {
+      localStorage.setItem('login', tipo);
+      document.getElementById('login-status').innerText = `Login com ${tipo} realizado!`;
+    }
+
+    function carregarHistoricoPeladas() {
+      const historico = [
+        'Pelada 1 - 05/04/2024',
+        'Pelada 2 - 12/04/2024',
+        'Pelada 3 - 19/04/2024'
+      ];
+      const ul = document.getElementById('historico-peladas');
+      historico.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        ul.appendChild(li);
+      });
+    }
+
+    window.onload = () => {
+      atualizarPartidas();
+      exibirPerfil();
+      carregarHistoricoPeladas();
+      if (localStorage.getItem('checkin') === 'feito') {
+        document.getElementById('checkin-status').innerText = 'Check-in já realizado';
+      }
+      const login = localStorage.getItem('login');
+      if (login) {
+        document.getElementById('login-status').innerText = `Login com ${login} ativo.`;
+      }
+    };
+  </script>
+</body>
+</html>
